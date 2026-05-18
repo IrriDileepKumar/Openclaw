@@ -1,0 +1,80 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/moonshot-anthropic/kimi-k2.6"
+      },
+      "models": {
+        "anthropic/moonshot-anthropic/kimi-k2.6": {
+          "alias": "Kimi K2.6 (Metrum)"
+        }
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "anthropic": {
+        "baseUrl": "https://llm-api.metrum.ai/anthropic",
+        "api": "anthropic-messages",
+        "models": [
+          {
+            "id": "moonshot-anthropic/kimi-k2.6",
+            "name": "Kimi K2.6 via Metrum",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 256000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "tools": {
+    "profile": "coding"
+  },
+  "plugins": {
+    "entries": {
+      "anthropic": {
+        "enabled": true
+      },
+      "whatsapp": {
+        "enabled": true
+      }
+    }
+  },
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "dmPolicy": "open",
+      "allowFrom": ["*"]
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "REPLACE_WITH_NEW_GATEWAY_TOKEN"
+    }
+  },
+  "mcp": {
+    "servers": {
+      "servicenow": {
+        "command": "npx",
+        "args": ["-y", "happy-platform-mcp"],
+        "env": {
+          "SERVICENOW_INSTANCE_URL": "REPLACE_WITH_YOUR_SERVICENOW_URL",
+          "SERVICENOW_USERNAME": "REPLACE_WITH_YOUR_USERNAME",
+          "SERVICENOW_PASSWORD": "REPLACE_WITH_YOUR_PASSWORD",
+          "SERVICENOW_AUTH_TYPE": "basic"
+        }
+      }
+    }
+  }
+}

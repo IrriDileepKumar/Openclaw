@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "profiles": {
+    "anthropic:default": {
+      "type": "api_key",
+      "provider": "anthropic",
+      "key": "REPLACE_WITH_YOUR_METRUM_API_KEY"
+    }
+  }
+}
