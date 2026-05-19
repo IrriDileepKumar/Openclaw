@@ -1,0 +1,15 @@
+{
+  "id": "content-filter",
+  "name": "Content Filter & Infra Metrics",
+  "description": "Content filter and deterministic infra metrics tools",
+  "activation": {
+    "onStartup": true
+  },
+  "contracts": {
+    "tools": ["get_mttr"]
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false
+  }
+}
