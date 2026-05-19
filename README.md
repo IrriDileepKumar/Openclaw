@@ -469,3 +469,55 @@ Usually means the LLM API (Metrum) is rate-limited or down. Check:
 journalctl --user -u openclaw-gateway.service --since "5 min ago" | grep -i error
 ```
 Wait a minute and try again, or check your Metrum API key and quota.
+
+**Tickets not sorted correctly / only showing closed tickets**
+The MCP tool's `order_by` parameter uses `sysparm_order_by` which does not sort
+correctly in ServiceNow. The sorting must go inside the `query` parameter using
+ServiceNow encoded query syntax (`ORDERBYDESCopened_at`), not `sysparm_order_by`.
+We patched `~/.npm-global/lib/node_modules/happy-platform-mcp/src/mcp-server-consolidated.js`
+so `SN-List-Incidents`, `SN-List-ChangeRequests`, and `SN-List-Problems` always
+append `ORDERBYDESCopened_at` to the query when no sort is specified. If you
+reinstall `happy-platform-mcp` via npm, you will lose this patch and need to
+reapply it.
+
+**LLM uses web_fetch instead of MCP tools (401 errors)**
+If TOOLS.md contains explicit API URLs with credentials, the LLM will try to use
+`web_fetch` to call ServiceNow directly instead of using the MCP tools. The
+`web_fetch` tool does not pass auth headers, so it gets 401 Unauthorized errors.
+Fix: remove all raw API URLs and credentials from `~/.openclaw/workspace/TOOLS.md`.
+Instead, tell the LLM to use the servicenow MCP tools which handle auth automatically.
+
+**Different users getting different/inconsistent results**
+The LLM does not always follow prompt instructions consistently. Do not rely on
+prompt instructions alone for critical behavior like sorting. Patch the MCP tool
+code directly (see "Tickets not sorted correctly" above) so the correct behavior
+is enforced at the tool level regardless of what the LLM passes.
+
+**content-filter plugin "not found" warning**
+The `openclaw doctor --fix` command removes the content-filter entry from
+`plugins.entries` in `openclaw.json` because it is a local plugin, not an
+installed one. After running doctor --fix:
+1. Re-add the content-filter entry to `plugins.entries` in `~/.openclaw/openclaw.json`:
+   ```json
+   "content-filter": {
+     "enabled": true,
+     "hooks": { "allowConversationAccess": true }
+   }
+   ```
+2. Make sure the plugin files are in `~/.openclaw/extensions/content-filter/`
+   (not just `~/.openclaw/plugins/content-filter/`). OpenClaw loads plugins
+   from the `extensions` directory.
+
+**Gateway stops at night / after closing SSH (NUC or local machines)**
+Two common causes:
+1. Machine goes to sleep/hibernate (power management). Disable sleep:
+   ```bash
+   sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+   ```
+2. Systemd user services die when the user session ends. Enable linger so
+   services survive after logout:
+   ```bash
+   sudo loginctl enable-linger $USER
+   ```
+   On AWS EC2, always run `sudo loginctl enable-linger ubuntu` after setup so the
+   gateway stays alive even when you disconnect from SSH.
